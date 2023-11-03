@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"pilrugen.com/snippetbox/pkg/models"
 	"strconv"
@@ -27,35 +26,44 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	// Создаем экземпляр структуры templateData,
 	// содержащий срез с заметками.
-	data := &templateData{Snippets: s}
+	//data := &templateData{Snippets: s}
 
 	// Инициализируем срез содержащий пути к двум файлам. Обратите внимание, что
 	// файл home.page.tmpl должен быть *первым* файлом в срезе.
-	files := []string{
-		"./ui/html/home.page.tmpl",
-		"./ui/html/base.layout.tmpl",
-		"./ui/html/footer.partial.tmpl",
-	}
+	//files := []string{
+	//	"./ui/html/home.page.tmpl",
+	//	"./ui/html/base.layout.tmpl",
+	//	"./ui/html/footer.partial.tmpl",
+	//}
 
 	// Используем функцию template.ParseFiles() для чтения файла шаблона.
 	// Если возникла ошибка, мы запишем детальное сообщение ошибки и
 	// используя функцию http.Error() мы отправим пользователю
 	// ответ: 500 Internal Server Error (Внутренняя ошибка на сервере)
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
+	//ts, err := template.ParseFiles(files...)
+	//if err != nil {
+	//	app.serverError(w, err)
+	//	return
+	//}
 
 	// Затем мы используем метод Execute() для записи содержимого
 	// шаблона в тело HTTP ответа. Последний параметр в Execute() предоставляет
 	// возможность отправки динамических данных в шаблон.
-	err = ts.Execute(w, data)
-	if err != nil {
-		// app.errorLog.Println(err.Error())
-		// http.Error(w, "Internal Server Error", 500)
-		app.serverError(w, err)
-	}
+	//err = ts.Execute(w, data)
+	//if err != nil {
+	//	// app.errorLog.Println(err.Error())
+	//	// http.Error(w, "Internal Server Error", 500)
+	//	app.serverError(w, err)
+	//}
+
+	// Используем помощника render() для отображения шаблона.
+	app.render(w, r, "home.page.tmpl", &templateData{
+		Snippets: s,
+	})
+
+	//for _, snippet := range s {
+	//	fmt.Fprintf(w, "%v\n", snippet)
+	//}
 }
 
 func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
@@ -75,27 +83,30 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := &templateData{Snippet: s}
+	//data := &templateData{Snippet: s}
+	//
+	//files := []string{
+	//	"./ui/html/show.page.tmpl",
+	//	"./ui/html/base.layout.tmpl",
+	//	"./ui/html/footer.partial.tmpl",
+	//}
 
-	files := []string{
-		"./ui/html/show.page.tmpl",
-		"./ui/html/base.layout.tmpl",
-		"./ui/html/footer.partial.tmpl",
-	}
+	//ts, err := template.ParseFiles(files...)
+	//if err != nil {
+	//	app.serverError(w, err)
+	//	return
+	//}
+	//
+	//err = ts.Execute(w, data)
+	//if err != nil {
+	//	app.serverError(w, err)
+	//}
+	app.render(w, r, "show.page.tmpl", &templateData{
+		Snippet: s,
+	})
 
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	err = ts.Execute(w, data)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	// fmt.Fprintf(w, "Отображение выбранной заметки с ID %d...", id)
-	//fmt.Fprintf(w, "%v", s)
+	fmt.Fprintf(w, "Отображение выбранной заметки с ID %d...\n", id)
+	fmt.Fprintf(w, "%v", s)
 }
 
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
