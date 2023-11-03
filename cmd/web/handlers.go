@@ -15,29 +15,42 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//s, err := app.snippets.Latest()
-	//if err != nil {
-	//	app.serverError(w, err)
-	//	return
-	//}
-	//
+	s, err := app.snippets.Latest()
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
 	//for _, snippet := range s {
 	//	fmt.Fprintf(w, "%v\n", snippet)
 	//}
 
+	// Создаем экземпляр структуры templateData,
+	// содержащий срез с заметками.
+	data := &templateData{Snippets: s}
+
+	// Инициализируем срез содержащий пути к двум файлам. Обратите внимание, что
+	// файл home.page.tmpl должен быть *первым* файлом в срезе.
 	files := []string{
 		"./ui/html/home.page.tmpl",
 		"./ui/html/base.layout.tmpl",
 		"./ui/html/footer.partial.tmpl",
 	}
 
+	// Используем функцию template.ParseFiles() для чтения файла шаблона.
+	// Если возникла ошибка, мы запишем детальное сообщение ошибки и
+	// используя функцию http.Error() мы отправим пользователю
+	// ответ: 500 Internal Server Error (Внутренняя ошибка на сервере)
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	err = ts.Execute(w, nil)
+	// Затем мы используем метод Execute() для записи содержимого
+	// шаблона в тело HTTP ответа. Последний параметр в Execute() предоставляет
+	// возможность отправки динамических данных в шаблон.
+	err = ts.Execute(w, data)
 	if err != nil {
 		// app.errorLog.Println(err.Error())
 		// http.Error(w, "Internal Server Error", 500)
@@ -87,6 +100,9 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
+		// Используем метод Header().Set() для добавления заголовка 'Allow: POST' в
+		// карту HTTP-заголовков. Первый параметр - название заголовка, а
+		// второй параметр - значение заголовка.
 		w.Header().Set("Allow", http.MethodPost)
 
 		// http.Error(w, "Метот запрещён!", 405)

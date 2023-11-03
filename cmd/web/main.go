@@ -31,6 +31,11 @@ func main() {
 
 	flag.Parse()
 
+	// Используйте log.New() для создания логгера для записи информационных сообщений. Для этого нужно
+	// три параметра: место назначения для записи логов (os.Stdout), строка
+	// с префиксом сообщения (INFO или ERROR) и флаги, указывающие, какая
+	// дополнительная информация будет добавлена. Обратите внимание, что флаги
+	// соединяются с помощью оператора OR |.
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
@@ -39,6 +44,9 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	// Мы также откладываем вызов db.Close(), чтобы пул соединений был закрыт
+	// до выхода из функции main().
+	// Подробнее про defer: https://golangs.org/errors#defer
 	defer db.Close()
 
 	app := &application{
@@ -58,6 +66,8 @@ func main() {
 	errorLog.Fatal(err)
 }
 
+// Функция openDB() обертывает sql.Open() и возвращает пул соединений sql.DB
+// для заданной строки подключения (DSN).
 func openDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
